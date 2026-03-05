@@ -16,8 +16,25 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework import routers
+from rest_framework import routers, permissions
 from api_telemetria.api import viewsets
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
+
+schema_view = get_schema_view(
+    openapi.Info
+    (
+        title='Financeiro API',
+        default_version='v1',
+        description='Sistema para cadastro e controle por telemetria de frota de veículos agrícolas',
+        terms_of_service='https://www.google.com/policies/terms/',
+        contact=openapi.Contact(email='contato@teste.com'),
+        license=openapi.License(name='Opensource'),
+    ),
+
+    public = True,
+    permission_classes = [permissions.AllowAny],
+)
 
 route = routers.DefaultRouter()
 route.register(r'marca', viewsets.MarcaViewset, basename="Marca")
@@ -29,5 +46,11 @@ route.register(r'medicaoveiculo', viewsets.MedicaoVeiculoViewset, basename="Medi
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include(route.urls))
+    path('', include(route.urls)),
+]
+
+urlpatterns += [
+    path('swaggerjson/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]
